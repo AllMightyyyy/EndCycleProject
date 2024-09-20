@@ -167,6 +167,7 @@ void sendMotionData(float temp, float humidity) {
     HTTPClient http;
     http.begin(serverUrl);  
     http.addHeader("Content-Type", "application/json");
+    http.addHeader("X-API-KEY", "9a1b2c3d4e5f6789a1b2c3d4e5f6789a");
 
     String requestData = "{\"motion\":\"detected\", \"temperature\":\"" + String(temp) + "\", \"humidity\":\"" + String(humidity) + "\"}";
     int httpResponseCode = http.POST(requestData); 
