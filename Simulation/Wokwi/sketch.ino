@@ -15,7 +15,7 @@
 #define YELLOW_LED_PIN 16  // Yellow LED connected to D16
 #define GREEN_LED_PIN 17   // Green LED connected to D17
 #define DOOR_PIN 18        // Door sensor connected to D18
-#define SMOKE_PIN  A0      // Smoke sensor connected to A0
+#define LDR_PIN A1         // Photoresistor connected to A1
 
 // OLED Display
 #define SCREEN_WIDTH 128
@@ -40,6 +40,7 @@ int doorValue = 0;
 int smokeValue = 0;
 float temperature = 0.0;
 float humidity = 0.0;
+int ldrValue = 0;  // Variable to hold LDR value
 const int SMOKE_THRESHOLD = 2000;  // Adjust as needed
 
 // Timing Variables for non-blocking delays
@@ -106,8 +107,8 @@ void loop() {
 
     pirValue = digitalRead(PIR_PIN);       // Read PIR sensor
     doorValue = digitalRead(DOOR_PIN);     // Read door sensor
-
-    smokeValue = analogRead(SMOKE_PIN);    // Read smoke sensor (0-4095)
+    smokeValue = analogRead(A0);            // Read smoke sensor (0-4095)
+    ldrValue = analogRead(LDR_PIN);         // Read LDR value
 
     temperature = dht.readTemperature();   // Read temperature
     humidity = dht.readHumidity();         // Read humidity
@@ -133,7 +134,6 @@ void loop() {
       Serial.println("Door closed!");
     } else {  // Button released, door open
       digitalWrite(YELLOW_LED_PIN, LOW); // Turn off yellow LED
-      Serial.println("Door open!");
     }
 
     // Handle smoke sensor
@@ -155,12 +155,9 @@ void loop() {
     displayStatus();
 
     // Send data to server if any sensor is triggered
-    if (pirValue == HIGH || doorValue == LOW || smokeValue > SMOKE_THRESHOLD) {
+    if (pirValue == HIGH || doorValue == LOW || smokeValue > SMOKE_THRESHOLD || ldrValue < 1000) {
       sendSensorData();
     }
-
-    // Check if the device should go to deep sleep (optional)
-    // checkForSleep();
   }
 }
 
@@ -177,6 +174,9 @@ void displayStatus() {
 
   display.print("Smoke: ");
   display.println(smokeValue);
+
+  display.print("LDR: ");
+  display.println(ldrValue);
 
   display.print("Temp: ");
   display.print(temperature);
@@ -199,6 +199,7 @@ void sendSensorData() {
     String requestData = "{\"motion\":\"" + String(pirValue) +
                          "\", \"door\":\"" + String(doorValue == LOW ? 1 : 0) +
                          "\", \"smoke\":\"" + String(smokeValue) +
+                         "\", \"ldr\":\"" + String(ldrValue) +
                          "\", \"temperature\":\"" + String(temperature) +
                          "\", \"humidity\":\"" + String(humidity) + "\"}";
 
@@ -224,7 +225,6 @@ void connectToWiFi() {
 
   unsigned long startAttemptTime = millis();  // Record the time the connection attempt started
 
-  // Non-blocking connection check with a timeout (e.g., 10 seconds)
   while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000) {
     Serial.print(".");
     delay(500);  // Brief delay for logging feedback

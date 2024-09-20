@@ -18,6 +18,7 @@ class MotionEvent(db.Model):
     motion = db.Column(db.String(50), nullable=False)
     temperature = db.Column(db.Float, nullable=True)
     humidity = db.Column(db.Float, nullable=True)
+    ldr_value = db.Column(db.Integer, nullable=True)  # New field for LDR value
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 def create_app():
@@ -49,14 +50,16 @@ def create_app():
         motion_status = data['motion']
         temperature = data.get('temperature', None)
         humidity = data.get('humidity', None)
+        ldr_value = data.get('ldr', None)  # Get the LDR value
 
-        logging.info(f"Motion: {motion_status}, Temp: {temperature}, Humidity: {humidity}")
+        logging.info(f"Motion: {motion_status}, Temp: {temperature}, Humidity: {humidity}, LDR: {ldr_value}")
 
         # Log the event in the database
         event = MotionEvent(
             motion=motion_status,
             temperature=temperature,
-            humidity=humidity
+            humidity=humidity,
+            ldr_value=ldr_value  # Save the LDR value
         )
         db.session.add(event)
         db.session.commit()
