@@ -5,36 +5,42 @@
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 #include <DHT_U.h>
-#include <esp_task_wdt.h>  
+#include <esp_task_wdt.h>
 
 // Pin Definitions
-#define LED_PIN 13        
-#define PIR_PIN 15        
-#define BUZZER_PIN 14    
-#define DHT_PIN 13       
+#define PIR_PIN 12         // PIR sensor connected to D12
+#define DHT_PIN 13         // DHT22 sensor connected to D13
+#define BUZZER_PIN 14      // Buzzer connected to D14
+#define RED_LED_PIN 15     // Red LED connected to D15
+#define YELLOW_LED_PIN 16  // Yellow LED connected to D16
+#define GREEN_LED_PIN 17   // Green LED connected to D17
+#define DOOR_PIN 18        // Door sensor connected to D18
+#define SMOKE_PIN  A0      // Smoke sensor connected to A0
 
 // OLED Display
-#define SCREEN_WIDTH 128  
-#define SCREEN_HEIGHT 64  
-#define OLED_RESET -1     
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1
 
 // DHT Sensor
-#define DHT_TYPE DHT22   
+#define DHT_TYPE DHT22
 DHT dht(DHT_PIN, DHT_TYPE);
 
 // WiFi and Server Details
-const char* ssid = "Wokwi-GUEST";        
-const char* password = ""; 
-const char* serverUrl = "https://esp8266-cf2819a51709.herokuapp.com/motion";  
+const char* ssid = "Wokwi-GUEST";
+const char* password = "";
+const char* serverUrl = "https://esp8266-cf2819a51709.herokuapp.com/motion";
 
 // OLED Display Object
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // Variables
-int pirstate = LOW; 
-int value = 0;       
-float lastTemp = -100;  // To track previous temperature value
-float lastHumidity = -100;
+int pirValue = 0;
+int doorValue = 0;
+int smokeValue = 0;
+float temperature = 0.0;
+float humidity = 0.0;
+const int SMOKE_THRESHOLD = 2000;  // Adjust as needed
 
 // Timing Variables for non-blocking delays
 unsigned long previousMillis = 0;
@@ -42,17 +48,19 @@ const long interval = 500;  // Interval for the loop (500 ms)
 
 // Function Prototypes
 void connectToWiFi();
-void displayMotionStatus(String status);
-void displayTempHumidity(float temp, float humidity);
-void sendMotionData(float temp, float humidity);
+void displayStatus();
+void sendSensorData();
 void checkForSleep();
 
 void setup() {
-  pinMode(LED_PIN, OUTPUT);   
-  pinMode(PIR_PIN, INPUT);     
-  pinMode(BUZZER_PIN, OUTPUT); 
-  
-  Serial.begin(115200);      
+  pinMode(PIR_PIN, INPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(RED_LED_PIN, OUTPUT);
+  pinMode(YELLOW_LED_PIN, OUTPUT);
+  pinMode(GREEN_LED_PIN, OUTPUT);
+  pinMode(DOOR_PIN, INPUT);  // Use external pull-up resistor
+
+  Serial.begin(115200);
 
   // OLED initialization
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
@@ -82,95 +90,109 @@ void loop() {
   esp_task_wdt_reset();  // Reset WDT at the beginning of each loop
 
   unsigned long currentMillis = millis();
-  
-  // Non-blocking loop, run only if interval has passed
+
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;  // Save the last time the loop ran
 
-    value = digitalRead(PIR_PIN);  // Read PIR sensor
-    float temperature = dht.readTemperature();  // Read temperature
-    float humidity = dht.readHumidity();        // Read humidity
+    pirValue = digitalRead(PIR_PIN);       // Read PIR sensor
+    doorValue = digitalRead(DOOR_PIN);     // Read door sensor
+
+    smokeValue = analogRead(SMOKE_PIN);    // Read smoke sensor (0-4095)
+
+    temperature = dht.readTemperature();   // Read temperature
+    humidity = dht.readHumidity();         // Read humidity
 
     // Check if readings from DHT sensor failed
     if (isnan(temperature) || isnan(humidity)) {
       Serial.println("Failed to read from DHT sensor!");
       temperature = 0.0;  // Fallback values
       humidity = 0.0;
+    }
+
+    // Handle PIR sensor
+    if (pirValue == HIGH) {
+      digitalWrite(RED_LED_PIN, HIGH);   // Turn on red LED
+      Serial.println("Motion detected!");
     } else {
-      Serial.print("Temperature: ");
-      Serial.print(temperature);
-      Serial.println(" C");
-      
-      Serial.print("Humidity: ");
-      Serial.print(humidity);
-      Serial.println(" %");
+      digitalWrite(RED_LED_PIN, LOW);    // Turn off red LED
     }
 
-    // Motion detected
-    if (value == HIGH) {        
-      digitalWrite(LED_PIN, HIGH);   // Turn on LED
-      digitalWrite(BUZZER_PIN, HIGH);  // Turn on Buzzer
-      displayMotionStatus("Motion Detected");
-      displayTempHumidity(temperature, humidity);
-
-      if (pirstate == LOW) {  // Motion was previously off
-        Serial.println("Motion detected!");
-        sendMotionData(temperature, humidity);  // Send data to server
-        pirstate = HIGH;   // Update motion state
-      }
-    } else {  // No motion detected
-      digitalWrite(LED_PIN, LOW);    // Turn off LED
-      digitalWrite(BUZZER_PIN, LOW); // Turn off Buzzer
-      displayMotionStatus("No Motion");
-      displayTempHumidity(temperature, humidity);
-
-      if (pirstate == HIGH) {  // Motion just ended
-        Serial.println("Motion ended!");
-        pirstate = LOW;    
-      }
+    // Handle door sensor
+    if (doorValue == LOW) {  // Button pressed, door closed
+      digitalWrite(YELLOW_LED_PIN, HIGH); // Turn on yellow LED
+      Serial.println("Door closed!");
+    } else {  // Button released, door open
+      digitalWrite(YELLOW_LED_PIN, LOW); // Turn off yellow LED
+      Serial.println("Door open!");
     }
 
-    // Check if the device should go to deep sleep
-    checkForSleep();
+    // Handle smoke sensor
+    if (smokeValue > SMOKE_THRESHOLD) {
+      digitalWrite(GREEN_LED_PIN, HIGH); // Turn on green LED
+      Serial.println("Smoke detected!");
+    } else {
+      digitalWrite(GREEN_LED_PIN, LOW); // Turn off green LED
+    }
+
+    // Handle buzzer
+    if (pirValue == HIGH || doorValue == LOW || smokeValue > SMOKE_THRESHOLD) {
+      digitalWrite(BUZZER_PIN, HIGH);  // Turn on buzzer
+    } else {
+      digitalWrite(BUZZER_PIN, LOW);   // Turn off buzzer
+    }
+
+    // Update OLED display
+    displayStatus();
+
+    // Send data to server if any sensor is triggered
+    if (pirValue == HIGH || doorValue == LOW || smokeValue > SMOKE_THRESHOLD) {
+      sendSensorData();
+    }
+
+    // Check if the device should go to deep sleep (optional)
+    // checkForSleep();
   }
 }
 
-// Display motion status on OLED
-void displayMotionStatus(String status) {
+// Function to display status on OLED
+void displayStatus() {
   display.clearDisplay();
   display.setCursor(0, 0);
-  display.print(status);
+
+  display.print("Motion: ");
+  display.println(pirValue == HIGH ? "Detected" : "None");
+
+  display.print("Door: ");
+  display.println(doorValue == LOW ? "Closed" : "Open");
+
+  display.print("Smoke: ");
+  display.println(smokeValue);
+
+  display.print("Temp: ");
+  display.print(temperature);
+  display.println(" C");
+
+  display.print("Humidity: ");
+  display.print(humidity);
+  display.println(" %");
+
   display.display();
 }
 
-// Display temperature and humidity on OLED, only if values change
-void displayTempHumidity(float temp, float humidity) {
-  if (temp != lastTemp || humidity != lastHumidity) {
-    display.setCursor(0, 20);
-    display.print("Temp: ");
-    display.print(temp);
-    display.print(" C");
-    display.setCursor(0, 30);
-    display.print("Humidity: ");
-    display.print(humidity);
-    display.print(" %");
-    display.display();
-
-    lastTemp = temp;
-    lastHumidity = humidity;
-  }
-}
-
-// Send motion data (temperature and humidity) to server via HTTP POST
-void sendMotionData(float temp, float humidity) {
+// Function to send sensor data to server
+void sendSensorData() {
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
-    http.begin(serverUrl);  
+    http.begin(serverUrl);
     http.addHeader("Content-Type", "application/json");
-    http.addHeader("X-API-KEY", "9a1b2c3d4e5f6789a1b2c3d4e5f6789a");
 
-    String requestData = "{\"motion\":\"detected\", \"temperature\":\"" + String(temp) + "\", \"humidity\":\"" + String(humidity) + "\"}";
-    int httpResponseCode = http.POST(requestData); 
+    String requestData = "{\"motion\":\"" + String(pirValue) +
+                         "\", \"door\":\"" + String(doorValue == LOW ? 1 : 0) +
+                         "\", \"smoke\":\"" + String(smokeValue) +
+                         "\", \"temperature\":\"" + String(temperature) +
+                         "\", \"humidity\":\"" + String(humidity) + "\"}";
+
+    int httpResponseCode = http.POST(requestData);
 
     if (httpResponseCode > 0) {
       Serial.print("HTTP Response: ");
@@ -180,16 +202,18 @@ void sendMotionData(float temp, float humidity) {
     }
 
     http.end();  // Free resources
+  } else {
+    Serial.println("WiFi not connected");
   }
 }
 
-// Connect to WiFi with a non-blocking connection check
+// Connect to WiFi
 void connectToWiFi() {
   WiFi.begin(ssid, password);
   Serial.print("Connecting to WiFi...");
-  
+
   unsigned long startAttemptTime = millis();  // Record the time the connection attempt started
-  
+
   // Non-blocking connection check with a timeout (e.g., 10 seconds)
   while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000) {
     Serial.print(".");
@@ -198,16 +222,20 @@ void connectToWiFi() {
 
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("Connected!");
-    displayMotionStatus("Connected to WiFi");
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.print("Connected to WiFi");
+    display.display();
   } else {
     Serial.println("WiFi Connection Failed");
-    displayMotionStatus("WiFi Connection Failed");
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.print("WiFi Connection Failed");
+    display.display();
   }
 }
 
-// Check for inactivity and go into deep sleep if no motion is detected
+// Optional: Function to enter deep sleep
 void checkForSleep() {
-  if (pirstate == LOW) {
-    ESP.deepSleep(300e6);  // Go into deep sleep for 5 minutes (300e6 µs)
-  }
+  // Implement sleep logic if necessary
 }
