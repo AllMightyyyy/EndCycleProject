@@ -115,6 +115,7 @@ To run the project locally, you’ll need the following installed:
 ├── 📁 mobile           # React Native code for mobile app
 ├── 📁 ml_model         # TensorFlow model and training data
 ├── 📁 simulation       # Wokwi simulation files
+├── 📁 notes            # Project notes
 └── README.md           # Project overview
 ```
 
