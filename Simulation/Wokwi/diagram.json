@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp1", "top": 240, "left": 170.98, "attrs": {} },
+    { "type": "wokwi-pir-motion-sensor", "id": "pir1", "top": 176.8, "left": 10, "attrs": {} },
+    {
+      "type": "wokwi-led",
+      "id": "led1",
+      "top": 265.2,
+      "left": 97.98,
+      "attrs": { "color": "red" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 340.8,
+      "left": 84.03,
+      "rotate": 90,
+      "attrs": { "value": "1000" }
+    },
+    {
+      "type": "board-ssd1306",
+      "id": "oled1",
+      "top": 137.54,
+      "left": 171.21,
+      "attrs": { "i2cAddress": "0x3c" }
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "bz1",
+      "top": 60,
+      "left": 393.58,
+      "attrs": { "volume": "0.1" }
+    },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht1",
+      "top": 115.5,
+      "left": 539.98,
+      "attrs": { "temperature": "34", "humidity": "49.5" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r2",
+      "top": 243.95,
+      "left": 545.38,
+      "attrs": { "value": "1000" }
+    }
+  ],
+  "connections": [
+    [ "pir1:GND", "esp1:GND.2", "black", [ "v126.07", "h107.64" ] ],
+    [ "pir1:OUT", "esp1:D15", "green", [ "v188.73", "h238.03", "v-71.33" ] ],
+    [ "pir1:VCC", "esp1:3V3", "red", [ "v211.2", "h278.4", "v-9.6" ] ],
+    [ "led1:A", "esp1:D12", "green", [ "v0" ] ],
+    [ "esp1:GND.2", "r1:2", "black", [ "h0" ] ],
+    [ "led1:C", "r1:1", "black", [ "v0" ] ],
+    [ "oled1:GND", "esp1:GND.1", "black", [ "v-28.8", "h124.8", "v9.6" ] ],
+    [ "oled1:VCC", "esp1:3V3", "red", [ "v-48", "h163.35", "v307.2", "h9.6" ] ],
+    [ "esp1:D5", "oled1:SCL", "green", [ "h23.5", "v-196.9", "h0", "v-9.6", "h-67.2" ] ],
+    [ "esp1:D4", "oled1:SDA", "#8f4814", [ "h52.3", "v-225.6", "h-86.4" ] ],
+    [ "esp1:GND.1", "bz1:1", "black", [ "h0" ] ],
+    [ "dht1:SIGNAL", "esp1:D13", "green", [] ],
+    [ "esp1:D14", "bz1:2", "red", [ "h-43.4", "v-302.4", "h345.6", "v86.4" ] ],
+    [ "dht1:VCC", "esp1:3V3", "red", [ "v0" ] ],
+    [ "dht1:GND", "esp1:GND.1", "black", [ "v0" ] ],
+    [ "esp1:D13", "dht1:SDA", "green", [ "h-33.8", "v-331.5", "h355.2", "v259.2", "h-48" ] ],
+    [ "dht1:VCC", "r2:1", "red", [ "v0", "h-96" ] ],
+    [ "dht1:SDA", "r2:2", "green", [ "v9.6", "h-38.3" ] ]
+  ],
+  "dependencies": {}
+}
