@@ -81,9 +81,19 @@ void setup() {
   // Connect to WiFi
   connectToWiFi();
 
-  // Initialize Watchdog Timer (WDT)
-  esp_task_wdt_init(5, true);  // 5 seconds timeout
-  esp_task_wdt_add(NULL);      // Add current thread to WDT
+  esp_task_wdt_config_t wdt_config = {
+    .timeout_ms = 5000,  // 5 seconds timeout
+    .idle_core_mask = (1 << portNUM_PROCESSORS) - 1,  // Apply WDT to all cores
+    .trigger_panic = true  // Enable panic on WDT timeout
+  };
+
+  esp_err_t wdt_init = esp_task_wdt_init(&wdt_config);  // Initialize WDT with config
+
+  if (wdt_init == ESP_OK) {
+    esp_task_wdt_add(NULL);  // Add current task (loop) to the Watchdog Timer
+  } else {
+    Serial.println("Failed to initialize Watchdog Timer");
+  }
 }
 
 void loop() {
