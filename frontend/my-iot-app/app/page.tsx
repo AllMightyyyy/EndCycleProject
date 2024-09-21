@@ -17,7 +17,7 @@ const Home = () => {
   const [startDate, setStartDate] = useState<Dayjs | null>(dayjs());
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs());
 
-  const [mounted, setMounted] = useState(false); 
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -35,10 +35,16 @@ const Home = () => {
   const latestData: SensorData = filteredData[filteredData.length - 1] || mockData[mockData.length - 1];
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: theme.palette.background.default, p: 3 }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: '#031627', p: 3 }}>
       {/* Only render DateTimePickers after the component has mounted */}
       {mounted && (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
+
+          {/* Dashboard */}
+          <Paper sx={{ p: 2, mb: 2, backgroundColor: theme.palette.background.paper }}>
+            <Dashboard latestData={latestData} />
+          </Paper>
+          
           <Box
             sx={{
               display: 'flex',
@@ -73,11 +79,6 @@ const Home = () => {
           </Box>
         </LocalizationProvider>
       )}
-
-      {/* Dashboard */}
-      <Paper sx={{ p: 2, mb: 2, backgroundColor: theme.palette.background.paper }}>
-        <Dashboard latestData={latestData} />
-      </Paper>
 
       {/* Chart */}
       <Paper sx={{ p: 2, backgroundColor: theme.palette.background.paper }}>

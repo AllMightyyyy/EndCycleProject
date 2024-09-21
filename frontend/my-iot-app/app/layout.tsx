@@ -16,7 +16,7 @@ import {
   ListItemText,
   Divider,
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles'; 
+import { useTheme } from '@mui/material/styles';
 import {
   Menu as MenuIcon,
   Dashboard as DashboardIcon,
@@ -83,7 +83,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <body>
         <ThemeProvider>
-          <Box sx={{ display: 'flex', backgroundColor: theme.palette.background.paper, }}>
+          <Box sx={{ display: 'flex' }}>
             <CssBaseline />
 
             {/* Sidebar */}
@@ -93,6 +93,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               onClose={handleDrawerToggle}
               ModalProps={{
                 keepMounted: true,
+              }}
+              sx={{
+                '& .MuiDrawer-paper': {
+                  boxSizing: 'border-box',
+                  width: drawerWidth,
+                  backgroundColor: '#031627', 
+                  color: '#f5f5f5',
+                },
               }}
             >
               {drawerContent}
@@ -104,6 +112,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 flexGrow: 1,
                 ml: { sm: `${drawerWidth}px` },
                 width: { sm: `calc(100% - ${drawerWidth}px)` },
+                backgroundColor: '#031627', 
               }}
             >
               {/* Top Bar */}
@@ -111,7 +120,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 position="fixed"
                 sx={{
                   zIndex: theme.zIndex.drawer + 1,
-                  backgroundColor: theme.palette.primary.main,
+                  backgroundColor: '#031627', 
                   color: theme.palette.primary.contrastText,
                 }}
               >
@@ -122,14 +131,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                       aria-label="open drawer"
                       edge="start"
                       onClick={handleDrawerToggle}
-                      sx={{ mr: 2, display: { sm: 'none' } }}
+                      sx={{ mr: 2 }}
                     >
                       <MenuIcon />
                     </IconButton>
                   )}
 
                   <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
-                    IoT Management - Zakaria Farih
+                    IoT Management
                   </Typography>
 
                   <IconButton color="inherit">
@@ -145,8 +154,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   flexGrow: 1,
                   p: 2,
                   mt: '64px',
-                  minHeight: '100vh',
-                  backgroundColor: theme.palette.background.default,
+                  backgroundColor: '#031627', 
                   color: theme.palette.text.primary,
                 }}
               >
