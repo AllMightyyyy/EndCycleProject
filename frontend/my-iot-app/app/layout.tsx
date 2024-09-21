@@ -28,6 +28,7 @@ import {
 import ThemeToggle from '../components/ThemeToggle';
 import { ThemeProvider } from '../context/ThemeContext';
 import Link from 'next/link';
+import ReactAnimatedWeather from 'react-animated-weather';
 
 const drawerWidth = 240;
 
@@ -40,6 +41,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     setMobileOpen(!mobileOpen);
   };
 
+  const iconColor = '#f5f5f5'; // Set a constant color for all icons
+
   const drawerContent = (
     <Box>
       <Toolbar />
@@ -47,33 +50,45 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <List>
         <ListItemButton component={Link} href="/">
           <ListItemIcon>
-            <DashboardIcon />
+            <DashboardIcon sx={{ color: iconColor }} /> {/* Set icon color */}
           </ListItemIcon>
-          <ListItemText primary="Dashboard" />
+          <ListItemText primary="Dashboard" sx={{ color: iconColor }} /> {/* Set text color */}
         </ListItemButton>
         <ListItemButton component={Link} href="/sensors">
           <ListItemIcon>
-            <SensorsIcon />
+            <SensorsIcon sx={{ color: iconColor }} /> {/* Set icon color */}
           </ListItemIcon>
-          <ListItemText primary="Sensors" />
+          <ListItemText primary="Sensors" sx={{ color: iconColor }} /> {/* Set text color */}
+        </ListItemButton>
+        <ListItemButton component={Link} href="/weather">
+          {/* Weather icon with constant white color */}
+          <ListItemIcon>
+            <ReactAnimatedWeather
+              icon="PARTLY_CLOUDY_DAY"
+              color={iconColor}  // Set constant white color
+              size={24}
+              animate={true}
+            />
+          </ListItemIcon>
+          <ListItemText primary="Weather" sx={{ color: iconColor }} /> {/* Set text color */}
         </ListItemButton>
         <ListItemButton component={Link} href="/settings">
           <ListItemIcon>
-            <SettingsIcon />
+            <SettingsIcon sx={{ color: iconColor }} /> {/* Set icon color */}
           </ListItemIcon>
-          <ListItemText primary="Settings" />
+          <ListItemText primary="Settings" sx={{ color: iconColor }} /> {/* Set text color */}
         </ListItemButton>
         <ListItemButton component={Link} href="/logs">
           <ListItemIcon>
-            <LogsIcon />
+            <LogsIcon sx={{ color: iconColor }} /> {/* Set icon color */}
           </ListItemIcon>
-          <ListItemText primary="Logs" />
+          <ListItemText primary="Logs" sx={{ color: iconColor }} /> {/* Set text color */}
         </ListItemButton>
         <ListItemButton component={Link} href="/alerts">
           <ListItemIcon>
-            <AlertsIcon />
+            <AlertsIcon sx={{ color: iconColor }} /> {/* Set icon color */}
           </ListItemIcon>
-          <ListItemText primary="Alerts" />
+          <ListItemText primary="Alerts" sx={{ color: iconColor }} /> {/* Set text color */}
         </ListItemButton>
       </List>
     </Box>
@@ -98,7 +113,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 '& .MuiDrawer-paper': {
                   boxSizing: 'border-box',
                   width: drawerWidth,
-                  backgroundColor: '#031627', 
+                  backgroundColor: '#031627',
                   color: '#f5f5f5',
                 },
               }}
@@ -112,7 +127,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 flexGrow: 1,
                 ml: { sm: `${drawerWidth}px` },
                 width: { sm: `calc(100% - ${drawerWidth}px)` },
-                backgroundColor: '#031627', 
+                backgroundColor: '#031627',
               }}
             >
               {/* Top Bar */}
@@ -120,7 +135,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 position="fixed"
                 sx={{
                   zIndex: theme.zIndex.drawer + 1,
-                  backgroundColor: '#031627', 
+                  backgroundColor: '#031627',
                   color: theme.palette.primary.contrastText,
                 }}
               >
@@ -133,7 +148,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                       onClick={handleDrawerToggle}
                       sx={{ mr: 2 }}
                     >
-                      <MenuIcon />
+                      <MenuIcon sx={{ color: iconColor }} /> {/* Set icon color */}
                     </IconButton>
                   )}
 
@@ -154,7 +169,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   flexGrow: 1,
                   p: 2,
                   mt: '64px',
-                  backgroundColor: '#031627', 
+                  backgroundColor: '#031627',
                   color: theme.palette.text.primary,
                 }}
               >

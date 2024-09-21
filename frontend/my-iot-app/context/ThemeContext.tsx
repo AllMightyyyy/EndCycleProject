@@ -37,14 +37,14 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       },
       secondary: {
         main: '#8fdf82', 
-        contrastText: '#f5f5f5',
+        contrastText: '#031627',
       },
       background: {
         default: themeMode === 'light' ? '#f5f5f5' : '#031627',
         paper: themeMode === 'light' ? '#ffffff' : '#1c1c1c', 
       },
       text: {
-        primary: themeMode === 'light' ? '#031627' : '#f5f5f5',
+        primary: themeMode === 'light' ? '#031627' : '#031627',
         secondary: '#8fdf82',
       },
     },
