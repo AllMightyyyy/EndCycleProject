@@ -15,6 +15,8 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import {
@@ -37,8 +39,24 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // State for Snackbar (notification)
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+
+  // Handle drawer toggle for mobile devices
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  // Handle Snackbar open/close
+  const handleAlertsClick = () => {
+    setOpenSnackbar(true);
+  };
+
+  const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
   };
 
   const iconColor = '#f5f5f5'; // Set a constant color for all icons
@@ -84,7 +102,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </ListItemIcon>
           <ListItemText primary="Logs" sx={{ color: iconColor }} /> {/* Set text color */}
         </ListItemButton>
-        <ListItemButton component={Link} href="/alerts">
+        <ListItemButton onClick={handleAlertsClick}> {/* Add click handler */}
           <ListItemIcon>
             <AlertsIcon sx={{ color: iconColor }} /> {/* Set icon color */}
           </ListItemIcon>
@@ -175,6 +193,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               >
                 {children}
               </Box>
+
+              {/* Snackbar Notification */}
+              <Snackbar
+                open={openSnackbar}
+                autoHideDuration={4000}
+                onClose={handleSnackbarClose}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+              >
+                <Alert onClose={handleSnackbarClose} severity="info" sx={{ width: '100%' }}>
+                  Alerts page is not yet implemented.
+                </Alert>
+              </Snackbar>
             </Box>
           </Box>
         </ThemeProvider>

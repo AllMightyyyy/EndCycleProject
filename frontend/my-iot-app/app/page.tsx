@@ -77,7 +77,7 @@ const Home = () => {
                 textField: {
                   fullWidth: true,
                   sx: {
-                    backgroundColor: '#ffffff', // Input fields styled to match
+                    backgroundColor: '#faf9f6', // Input fields styled to match
                     borderRadius: 2,
                     color: '#031627', // Fixed dark text color inside the input fields
                   },
@@ -92,7 +92,7 @@ const Home = () => {
                 textField: {
                   fullWidth: true,
                   sx: {
-                    backgroundColor: '#ffffff', // Input fields styled to match
+                    backgroundColor: '#faf9f6', // Input fields styled to match
                     borderRadius: 2,
                     color: '#031627', // Fixed dark text color inside the input fields
                   },
