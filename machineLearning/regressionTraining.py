@@ -51,3 +51,11 @@ joblib.dump(scaler, scaler_save_path)
 
 print(f'Model saved at {model_save_path}')
 print(f'Scaler saved at {scaler_save_path}')
+
+coefficients = model.coef_
+intercept = model.intercept_
+feature_names = X.columns
+
+for coef, feature in zip(coefficients, feature_names):
+    print(f"Coefficient for {feature}: {coef}")
+print(f"Intercept: {intercept}")
